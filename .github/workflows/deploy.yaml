@@ -32,35 +32,29 @@ jobs:
         project_id: ${{ env.PROJECT_ID }}
 
     - name: Configure Docker auth for Artifact Registry
-      run: |
-        gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+      run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
 
-    # ---- BUILD DOCKER IMAGE (correct folder) ----
+    # ---- BUILD DOCKER IMAGE ----
     - name: Build Docker Image
       working-directory: ./weather-ui/weather-ui
       run: |
-        docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/\
-${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
+        docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
 
     # ---- PUSH IMAGE ----
     - name: Push Docker Image
       run: |
-        docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/\
-${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+        docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
     # ---- CONNECT TO GKE ----
     - name: Get GKE Credentials
       run: |
-        gcloud container clusters get-credentials $CLUSTER_NAME \
-        --zone $ZONE --project $PROJECT_ID
+        gcloud container clusters get-credentials $CLUSTER_NAME --zone $ZONE --project $PROJECT_ID
 
     # ---- UPDATE IMAGE IN DEPLOYMENT ----
     - name: Update Image In Deployment
       run: |
-        kubectl set image deployment/weather-ui weather-ui=${{ env.REGION }}-docker.pkg.dev/\
-${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+        kubectl set image deployment/weather-ui weather-ui=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
     # ---- APPLY MANIFESTS ----
     - name: Apply Kubernetes Manifests
-      run: |
-        kubectl apply -f k8s/
+      run: kubectl apply -f k8s/
