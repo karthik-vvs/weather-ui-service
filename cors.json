@@ -1,0 +1,8 @@
+[
+  {
+    "origin": ["http://localhost:3000", "http://localhost:8080", "http://34.93.10.236"],
+    "responseHeader": ["Content-Type", "Authorization"],
+    "method": ["GET", "HEAD", "OPTIONS"],
+    "maxAgeSeconds": 3600
+  }
+]

@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: weather-ui-deployment
+  labels:
+    app: weather-ui
+namespace: weather
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: weather-ui
+  template:
+    metadata:
+      labels:
+        app: weather-ui
+    spec:
+      containers:
+        - name: weather-ui
+          image: us-central1-docker.pkg.dev/bold-streamer-476213-u0/weather-images/weather-ui:v1
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"

@@ -1,0 +1,25 @@
+# Node
+node_modules/
+npm-debug.log
+dist/
+
+# React
+build/
+*.local
+
+# Cloud Functions
+weather-fetcher/node_modules/
+weather-ai-processor/node_modules/
+
+# Terraform
+infra/.terraform/
+infra/terraform.tfstate
+infra/terraform.tfstate.backup
+
+# Docker
+*.tar
+
+# OS / IDE
+.DS_Store
+.vscode/
+.idea/
