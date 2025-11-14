@@ -6,7 +6,7 @@ on:
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  REGION: ${{ secrets.ARTIFACT_REGION }}
+  REGION: ${{ secrets.ARTIFACT_REGION }}          # e.g., us-central1
   CLUSTER_NAME: ${{ secrets.GKE_CLUSTER_NAME }}
   ZONE: ${{ secrets.GKE_CLUSTER_ZONE }}
   REPO_NAME: "weather-images"
@@ -34,14 +34,22 @@ jobs:
       run: |
         gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
 
+    # -------------------------
+    # Build UI from weather-ui/
+    # -------------------------
     - name: Build Docker Image
+      working-directory: ./weather-ui
       run: |
         docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
 
     - name: Push Docker Image
+      working-directory: ./weather-ui
       run: |
         docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
+    # -------------------------
+    # Deploy to GKE
+    # -------------------------
     - name: Get GKE Credentials
       run: |
         gcloud container clusters get-credentials $CLUSTER_NAME --zone $ZONE --project $PROJECT_ID
@@ -53,4 +61,3 @@ jobs:
     - name: Apply all Kubernetes manifests
       run: |
         kubectl apply -f k8s/
-
