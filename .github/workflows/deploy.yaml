@@ -6,7 +6,7 @@ on:
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  REGION: ${{ secrets.ARTIFACT_REGION }}          # e.g., us-central1
+  REGION: ${{ secrets.ARTIFACT_REGION }}
   CLUSTER_NAME: ${{ secrets.GKE_CLUSTER_NAME }}
   ZONE: ${{ secrets.GKE_CLUSTER_ZONE }}
   REPO_NAME: "weather-images"
@@ -34,30 +34,33 @@ jobs:
       run: |
         gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
 
-    # -------------------------
-    # Build UI from weather-ui/
-    # -------------------------
+    # -------------------------------
+    # Build & Push Docker Image
+    # -------------------------------
     - name: Build Docker Image
-      working-directory: ./weather-ui
       run: |
-        docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
+        docker build \
+          -f weather-ui/weather-ui/Dockerfile \
+          -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+          weather-ui/weather-ui/
 
     - name: Push Docker Image
-      working-directory: ./weather-ui
       run: |
         docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
-    # -------------------------
-    # Deploy to GKE
-    # -------------------------
+    # -------------------------------
+    # Deploy to Kubernetes
+    # -------------------------------
     - name: Get GKE Credentials
       run: |
-        gcloud container clusters get-credentials $CLUSTER_NAME --zone $ZONE --project $PROJECT_ID
+        gcloud container clusters get-credentials $CLUSTER_NAME \
+          --zone $ZONE \
+          --project $PROJECT_ID
 
     - name: Update Kubernetes Deployment Image
       run: |
         kubectl set image deployment/weather-ui weather-ui=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
-    - name: Apply all Kubernetes manifests
+    - name: Apply Kubernetes Manifests
       run: |
         kubectl apply -f k8s/
