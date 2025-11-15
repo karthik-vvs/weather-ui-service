@@ -59,8 +59,8 @@ jobs:
       # 8️⃣ Update Deployment Image
       - name: Update Image In Deployment
         run: |
-          kubectl set image deployment/weather-ui weather-ui=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          kubectl set image deployment/weather-ui-deployment weather-ui=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} -n weather
 
       # 9️⃣ Apply Kubernetes Manifests
       - name: Apply Kubernetes Manifests
-        run: kubectl apply -f k8s/
+        run: kubectl apply -f k8s/ -n weather
