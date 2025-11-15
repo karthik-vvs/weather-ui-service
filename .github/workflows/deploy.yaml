@@ -27,44 +27,40 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
 
+      # 3️⃣ Configure gcloud
       - name: Configure gcloud
         uses: google-github-actions/setup-gcloud@v2
         with:
           project_id: ${{ env.PROJECT_ID }}
 
-      - name: Configure Docker auth for Artifact Registry
+      # 4️⃣ Configure Docker auth for Artifact Registry
+      - name: Configure Docker auth
         run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
 
-      # 3️⃣ Build Docker Image
+      # 5️⃣ Build Docker Image
       - name: Build Docker Image
-        working-directory: ./weather-ui
+        working-directory: ./weather-ui      # flattened folder
         run: |
           docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
 
-      # 4️⃣ Push Docker Image
+      # 6️⃣ Push Docker Image
       - name: Push Docker Image
         run: |
           docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
-      # 5️⃣ Connect to GKE
-      - name: Install gke-gcloud-auth-plugin
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
-
-      - name: Configure kubectl to use the plugin
-        run: |
-          gcloud config set container/use_client_certificate True
-
+      # 7️⃣ Connect to GKE (with official plugin)
       - name: Get GKE Credentials
-        run: |
-          gcloud container clusters get-credentials $CLUSTER_NAME --zone $ZONE --project $PROJECT_ID
+        uses: google-github-actions/get-gke-credentials@v3
+        with:
+          cluster_name: ${{ env.CLUSTER_NAME }}
+          location: ${{ env.ZONE }}
+          project_id: ${{ env.PROJECT_ID }}
 
-      # 6️⃣ Update Deployment Image
+      # 8️⃣ Update Deployment Image
       - name: Update Image In Deployment
         run: |
           kubectl set image deployment/weather-ui weather-ui=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
-      # 7️⃣ Apply Kubernetes Manifests
+      # 9️⃣ Apply Kubernetes Manifests
       - name: Apply Kubernetes Manifests
         run: kubectl apply -f k8s/
