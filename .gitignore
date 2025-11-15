@@ -6,6 +6,7 @@ dist/
 # React
 build/
 *.local
+weather-ui/weather-ui/node_modules/
 
 # Cloud Functions
 weather-fetcher/node_modules/
