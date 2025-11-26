@@ -285,10 +285,17 @@ Use this in your final demo:
 You have built a complete, production-style cloud system:
 
 ✔ Serverless ingestion
+
 ✔ Serverless AI processing
+
 ✔ Visualization via GKE
+
 ✔ Secure secret management
+
 ✔ Structured logging pipeline
+
 ✔ IAAC (Terraform)
+
 ✔ Low-cost and scalable
+
 ✔ Clean architecture for presentation
