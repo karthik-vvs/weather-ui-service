@@ -102,6 +102,7 @@ resource "google_cloudfunctions2_function" "process_weather" {
   }
 }
 
+
 # ---------------------------------------------------------
 # 5️⃣ GKE Cluster (Simple: 1 node)
 # ---------------------------------------------------------
