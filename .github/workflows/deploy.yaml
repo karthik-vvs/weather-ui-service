@@ -1,0 +1,67 @@
+name: Deploy to GKE
+
+on:
+  push:
+    branches: ["main"]
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: ${{ secrets.ARTIFACT_REGION }}
+  CLUSTER_NAME: ${{ secrets.GKE_CLUSTER_NAME }}
+  ZONE: ${{ secrets.GKE_CLUSTER_ZONE }}
+  REPO_NAME: "weather-images"
+  IMAGE_NAME: "weather-ui"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout Code
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # 2️⃣ Authenticate to Google Cloud
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+      # 3️⃣ Configure gcloud
+      - name: Configure gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+
+      # 4️⃣ Configure Docker auth for Artifact Registry
+      - name: Configure Docker auth
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+
+      # 5️⃣ Build Docker Image
+      - name: Build Docker Image
+        working-directory: ./weather-ui      # flattened folder
+        run: |
+          docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
+
+      # 6️⃣ Push Docker Image
+      - name: Push Docker Image
+        run: |
+          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      # 7️⃣ Connect to GKE (with official plugin)
+      - name: Get GKE Credentials
+        uses: google-github-actions/get-gke-credentials@v3
+        with:
+          cluster_name: ${{ env.CLUSTER_NAME }}
+          location: ${{ env.ZONE }}
+          project_id: ${{ env.PROJECT_ID }}
+
+      # 8️⃣ Apply Kubernetes Manifests
+      - name: Apply Kubernetes Manifests
+        run: kubectl apply -f k8s/ -n weather
+
+      # 9️⃣ Update Deployment Image
+      - name: Update Image In Deployment
+        run: |
+          kubectl set image deployment/weather-ui-deployment weather-ui=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} -n weather
+

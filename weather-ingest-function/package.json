@@ -1,0 +1,10 @@
+{
+  "name": "weather-ingest-function",
+  "version": "1.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "@google-cloud/storage": "^7.9.0",
+    "axios": "^1.7.0",
+    "dotenv": "^17.2.3"
+  }
+}
