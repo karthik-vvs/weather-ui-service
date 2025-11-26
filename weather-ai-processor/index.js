@@ -19,7 +19,7 @@ exports.processWeatherData = async (req, res) => {
     // 2) Prepare prompt
     const textPrompt = `
     Analyze the following weather data and generate:
-    1. A short descriptive summary in 3 lines.
+    1. A short descriptive summary.
     2. A mood/feeling word.
     Weather data: ${JSON.stringify(weatherData, null, 2)}
     `;
