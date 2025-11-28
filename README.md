@@ -113,7 +113,7 @@ CMD ["npx", "serve", "-s", "build", "-l", "8080"]
 
 Single-node cluster
 
-Deployment + Service via manifest or Helm
+Deployment + Service via manifest
 
 LoadBalancer exposes the dashboard
 
@@ -254,19 +254,19 @@ API keys stored in Secret Manager, never hard-coded.
 
  - No VMs, no long-running servers
 
-**📊 Demo Flow (Presentation Script)**
+**📊 Demo Testing Flow**
 
-Use this in your final demo:
+This is the flow of the task:
 
-**1. Show Scheduler → Function → GCS**
+**1. Scheduler → Function → GCS**
 
  - “Every 30 minutes, the fetch function triggers and stores weather JSON.”
 
-**2. Show Vertex AI Enrichment**
+**2. Vertex AI Enrichment**
 
  - “When new data lands, the AI function generates mood + summary.”
 
-**3. Show UI on GKE**
+**3. UI on GKE**
 
  - “UI retrieves AI-enriched weather and visualizes it.”
 
@@ -276,13 +276,13 @@ Use this in your final demo:
 
  - View logs in Cloud Logging.
 
-**5. Show Terraform**
+**5. Terraform**
 
  - “All infrastructure fully reproducible.”
 
 **🏁 Final Outcome**
 
-You have built a complete, production-style cloud system:
+This is a complete, production-style cloud system:
 
 ✔ Serverless ingestion
 
